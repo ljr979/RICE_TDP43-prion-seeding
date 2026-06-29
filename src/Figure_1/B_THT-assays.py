@@ -66,7 +66,7 @@ def set_params_for_plotting(fontsize=10):
 if __name__ == '__main__':
 
     input_folder = 'input_data/Figure_1/'
-    output_folder = 'results/Figure_1/A_ThTassays/'
+    output_folder = 'output/Figure_1/B_THT-assays/'
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
