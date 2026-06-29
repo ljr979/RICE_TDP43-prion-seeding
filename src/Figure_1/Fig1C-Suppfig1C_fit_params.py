@@ -1,5 +1,5 @@
 
-#script to read in the fit parameters from all replicates of seeding and cross seeding, and to plot the elongation rate for all. This is found in Supplementary Figure 1, panel C.
+#script to read in the fit parameters from all replicates of seeding and cross seeding, and to plot the lag phase and elongation rate for all. This is found in Figure 1C, and Supplementary Figure 1, panel C respectively.
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,6 +8,8 @@ from src.paperfig_utils import save_figure_svg_png, set_params_for_plotting
 import numpy as np
 from statannotations.Annotator import Annotator
 import matplotlib.patches as mpatches
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+from scipy import stats
 
 
 def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None, scat_hue_order=None, palette=False, xlabel='', ylabel=False, xticks=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='', dot_size=5, cap_size=0.2, cap_width=2):
@@ -126,37 +128,67 @@ if __name__ == '__main__':
     bar_colors = [combined_palette[(protein, 'seeding')] for protein in xaxis_order]
     newcol_dict = dict(zip(xaxis_order, bar_colors))
 
-    #plot elonation rate as a barplot with scatterplot overlaid
-    fig, ax = bardotplot(fit_params, 't2', 'elongation_rate', xaxis_order, hue='t1', hue_order=t1_order, scat_hue='t1', scat_hue_order=t1_order, palette='tab10', xlabel='', ylabel='Elongation rate', xticks=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='True', dot_size=5, cap_size=0.15, cap_width=2)
+    #change the plotted y label depending on the parameter being plotted
+    ylabel_dict = {
+        'tlag': 'Lag Phase (h)',
+        'elongation_rate': 'Elonation rate (change in ThT/h)'
+    }
 
-    #assign different patches to each bar depending on the type of seeding occurring
-    for stype, patch in zip([('monomer', mut) for mut in xaxis_order]+ [('seeding', mut) for mut in xaxis_order]+[('xseeding', mut) for mut in xaxis_order], ax.patches):
-        if stype[0] =='seeding':
-            patch.set_facecolor(newcol_dict[stype[1]])
-            patch.set_edgecolor('#fff')
-            patch.set_linewidth(1)
-            patch.set_hatch('///')
-        elif stype[0] == 'xseeding':
-            patch.set_facecolor(newcol_dict[stype[1]])
-            patch.set_edgecolor('#fff')
-            patch.set_linewidth(1)
-            patch.set_hatch('o')
-        else:
-            patch.set_facecolor(newcol_dict[stype[1]])
-            patch.set_edgecolor('#fff')
-            patch.set_linewidth(1)
-        
-        #add legend entries for each of the patches defined above
-        mon_patch = mpatches.Patch(facecolor='dimgray', label='Monomer', edgecolor='#fff', linewidth=1)
-        seed_patch = mpatches.Patch(facecolor='dimgray', label='Self-seed', edgecolor='#fff', linewidth=0, hatch='///')
-        xseed_patch = mpatches.Patch(facecolor='dimgray', label='Cross-seed', edgecolor='#fff', linewidth=0, hatch='o')
-        #apply patches to the legend
-        handles, labels = ax.get_legend_handles_labels()
-        by_label = dict(zip(reversed(labels), reversed(handles)))
-        ax.legend([mon_patch, seed_patch, xseed_patch], ['Monomer', 'Self-seed', 'Cross-seed'], frameon=False, loc='upper left', handlelength=2., handletextpad=0.25, bbox_to_anchor=(-0.005, 1.15), ncols=3)
+    for param in ['tlag', 'elongation_rate']:
+        param
+        #plot elonation rate as a barplot with scatterplot overlaid
+        fig, ax = bardotplot(fit_params, 't2', f'{param}', xaxis_order, hue='t1', hue_order=t1_order, scat_hue='t1', scat_hue_order=t1_order, palette='tab10', xlabel='', ylabel=ylabel_dict[f'{param}'], xticks=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='True', dot_size=5, cap_size=0.15, cap_width=2)
 
-    plt.tight_layout()
-    save_figure_svg_png(fig, f'{output_folder}SuppFig1C_elongation', width=3.5, dpi=600)
+        #assign different patches to each bar depending on the type of seeding occurring
+        for stype, patch in zip([('monomer', mut) for mut in xaxis_order]+ [('seeding', mut) for mut in xaxis_order]+[('xseeding', mut) for mut in xaxis_order], ax.patches):
+            if stype[0] =='seeding':
+                patch.set_facecolor(newcol_dict[stype[1]])
+                patch.set_edgecolor('#fff')
+                patch.set_linewidth(1)
+                patch.set_hatch('///')
+            elif stype[0] == 'xseeding':
+                patch.set_facecolor(newcol_dict[stype[1]])
+                patch.set_edgecolor('#fff')
+                patch.set_linewidth(1)
+                patch.set_hatch('o')
+            else:
+                patch.set_facecolor(newcol_dict[stype[1]])
+                patch.set_edgecolor('#fff')
+                patch.set_linewidth(1)
+            
+            #add legend entries for each of the patches defined above
+            mon_patch = mpatches.Patch(facecolor='dimgray', label='Monomer', edgecolor='#fff', linewidth=1)
+            seed_patch = mpatches.Patch(facecolor='dimgray', label='Self-seed', edgecolor='#fff', linewidth=0, hatch='///')
+            xseed_patch = mpatches.Patch(facecolor='dimgray', label='Cross-seed', edgecolor='#fff', linewidth=0, hatch='o')
+            #apply patches to the legend
+            handles, labels = ax.get_legend_handles_labels()
+            by_label = dict(zip(reversed(labels), reversed(handles)))
+            ax.legend([mon_patch, seed_patch, xseed_patch], ['Monomer', 'Self-seed', 'Cross-seed'], frameon=False, loc='upper left', handlelength=2., handletextpad=0.25, bbox_to_anchor=(-0.005, 1.15), ncols=3)
+
+        plt.tight_layout()
+        if param=='elongation_rate':
+            save_figure_svg_png(fig, f'{output_folder}SuppFig1C_elongation', width=3.5, dpi=600)
+
+        elif param=='tlag':
+            save_figure_svg_png(fig, f'{output_folder}Fig1C_lagphase', width=3.5, dpi=600)
 
 
-    
+    #statistics to add to the plot (comparing for each protein, between the different types of seeding e.g. cross seed vs. monomer only vs. self seed)
+
+    fit_params ['for_stats'] = fit_params[['t1', 't2']].apply('-'.join, axis=1)
+    # Group the lag_phase values by treatment
+    for protein, df in fit_params.groupby('t2'):
+        print(protein)
+        groups = [group['tlag'].values for name, group in df.groupby('for_stats')]
+        # Run one-way ANOVA
+        f_stat, p_value = stats.f_oneway(*groups)
+
+        print(f"F-statistic: {f_stat:.3f}")
+        print(f"P-value: {p_value:.5f}")
+
+
+        # Run Tukey's HSD test
+        tukey = pairwise_tukeyhsd(endog=df['tlag'], groups=df['for_stats'], alpha=0.05)
+
+        # Print summary
+        print(tukey)
