@@ -1,9 +1,13 @@
-import os, re
+"""Plot normalized variant-seeding measurements for Figure 2H.
+
+Filters the prepared table to the non-particle-equalized conditions, summarizes
+technical observations within each experiment, and exports the comparison plot.
+"""
+
+import os
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from loguru import logger
 from statannotations.Annotator import Annotator
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 from scipy import stats 
@@ -11,6 +15,7 @@ import matplotlib.patches as mpatches
 from src.paperfig_utils import save_figure_svg_png, set_params_for_plotting
 
 def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None, scat_hue_order=None, palette=False, xlabel='', ylabel=False, pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='', dot_size=5, cap_size=0.2, cap_width=2):
+    """Draw a bar plot with individual observations and optional annotations."""
     if ax is None:
         fig, ax = plt.subplots()
     sns.barplot(
@@ -74,6 +79,7 @@ def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None,
     return fig, ax
 
 def anova_tukeyshsd(df, value_col, grouping_col):
+    """Print one-way ANOVA and Tukey HSD results for the selected columns."""
     groups = [group[value_col].values for name, group in df.groupby(grouping_col)]
     # Run one-way ANOVA
     f_stat, p_value = stats.f_oneway(*groups)
@@ -102,12 +108,11 @@ if __name__ == '__main__':
 
     collated_coloc = pd.read_csv(f'{input_folder}Fig2H_variant-seeding.csv')
 
-    #filter for only those treatments which had no particle equalisation. assign to a new dataframe.
+    # Keep only treatments that were not particle-equalized.
     not_norm_only = collated_coloc[collated_coloc['t3'].isin(['only', 'vehicle','UD-A382P', 'UD-G335D', 'UD-W385G','UD-WT','UD-mon'])]
     not_norm_only.drop([col for col in not_norm_only.columns.tolist() if 'Unnamed:' in col], axis=1 , inplace=True)
 
-    #take the average of each experimental replicate
-    #this averages all the technical replicates for each biological replicate (i.e. multiple wells of a plate.)
+    # Average technical wells within each experiment and treatment.
     normed_aggs_avg = not_norm_only.groupby(['Experiment', 'plot_treat'])['normed_to_WT'].agg(
     mean='mean',
     std_dev='std'

@@ -12,7 +12,7 @@ timepoints should be stored as column headers, and the plate map should only
 contain wells for which measurements are present.
 """
 
-import os, re
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -58,13 +58,12 @@ def create_sample_dictionary(map_df):
     """
     sample_dict = {}
 
-    for index, row in map_df.iterrows():
+    for _, row in map_df.iterrows():
         row_label = row['row']
 
         for col in map_df.columns:
             if col == 'row':
                 continue
-            col
             if pd.notna(row[col]):
                 coordinate = f"{row_label}_{col}"
                 sample_dict[coordinate] = row[col]
@@ -99,9 +98,7 @@ def add_info (df):
         annotation columns.
     """
     new=[]
-    for ids, d in df.groupby('ID'):    
-        ids
-        d
+    for ids, d in df.groupby('ID'):
         if 'time(h)' not in ids:
             d['treat2'] = ids.split('_')[1]
             d['treat1'] = ids.split('_')[0]
@@ -124,7 +121,6 @@ def average_tech_replicates(new):
     """
     averages = []
     for treat, x in new.groupby('treat2'):
-        x
         to_av = [col for col in x if col not in ['ID', 'replicate', 'treat1', 'treat2']]
         numeric = x[[c for c in x.columns if c in to_av]].astype(int)
         average = pd.DataFrame(numeric.mean(axis=0)).T
@@ -203,9 +199,6 @@ def plot_fluo_over_time(d, interval_mins, output_folder, palette, Exp_num, lengt
         else:
             new_pal = palette
         for i, (t2, abc) in enumerate(xyz.groupby('t2')):
-            i
-            t2
-            abc
             sns.lineplot(data=abc, x='time (h)', y='intensity', palette=new_pal, hue='t3', ax=axes[i])
             axes[i].set_xlim(0,length_exp)
             axes[i].set_ylim(ylim)
@@ -352,7 +345,6 @@ if __name__ == '__main__':
     # Generate per-mutation quality-control plots of normalized fluorescence
     # trajectories for visual inspection.
     for mut, df in test_Df.groupby('t2'):
-        df
         print(mut)
         
         new_pal = palette_dict[mut]

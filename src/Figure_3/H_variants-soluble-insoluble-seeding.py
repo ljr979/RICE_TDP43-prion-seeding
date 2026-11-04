@@ -1,4 +1,11 @@
-import os, re
+"""Plot seeding measurements for whole, soluble, and insoluble fractions.
+
+Reads the prepared Figure 3H summary, applies the manuscript palette, and
+exports a fraction-level comparison for the TDP-43 variants.
+"""
+
+import os
+import re
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,34 +17,34 @@ import matplotlib.patches as mpatches
 from src.paperfig_utils import save_figure_svg_png, set_params_for_plotting
 
 def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None, scat_hue_order=None, palette=False, xlabel='', ylabel=False, pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='', dot_size=5, cap_size=0.2, cap_width=2):
-    """plots a BARPLOT with a scatterplot overlaid
+    """Plot bars with individual observations and optional statistical labels.
 
     Args:
-        data (df): dataframe containing information of interest
-        xcol (str): column name for xaxis
-        ycol (str): column name for y axis
-        order (list): _description_
-        hue (_type_, optional): if hue is being used to get split bars, pass in a string for the column name here. Defaults to None.
-        hue_order (_type_, optional): should pass a list to this to ensure that the hue splitting is plotted in the correct order. Defaults to None.
-        scat_hue (_type_, optional): _description_. Defaults to None.
-        scat_hue_order (_type_, optional): if using hue, need to also have hue for scatterplot and pass the order of the hue so they match. Defaults to None.
-        palette (bool, optional): _description_. Defaults to False.
-        xlabel (str, optional): _description_. Defaults to ''.
-        ylabel (bool, optional): _description_. Defaults to False.
-        pairs (bool, optional): _description_. Defaults to False.
-        correction (_type_, optional): _description_. Defaults to None.
-        xticks (_type_, optional): _description_. Defaults to None.
-        groups (_type_, optional): _description_. Defaults to None.
-        group_label_y (float, optional): _description_. Defaults to -0.18.
-        group_line_y (float, optional): _description_. Defaults to -0.05.
-        ax (_type_, optional): _description_. Defaults to None.
-        legend (str, optional): _description_. Defaults to ''.
-        dot_size (int, optional): _description_. Defaults to 5.
-        cap_size (float, optional): _description_. Defaults to 0.2.
-        cap_width (int, optional): _description_. Defaults to 2.
+        data: Dataframe containing the measurements and plotting metadata.
+        xcol: Column used for x-axis categories.
+        ycol: Column containing the plotted response.
+        order: Display order for x-axis categories.
+        hue: Optional column used to split bars into groups.
+        hue_order: Display order for hue groups.
+        scat_hue: Optional column used to color individual observations.
+        scat_hue_order: Display order for scatter groups.
+        palette: Seaborn palette specification.
+        xlabel: X-axis label.
+        ylabel: Y-axis label.
+        pairs: Optional group pairs for statistical annotation.
+        correction: Multiple-comparison correction passed to the annotator.
+        xticks: Optional x-axis tick positions.
+        groups: Optional grouped-axis labels and line coordinates.
+        group_label_y: Vertical position for optional group labels.
+        group_line_y: Vertical position for optional group lines.
+        ax: Existing Matplotlib axes, or ``None`` to create axes.
+        legend: Empty string hides the legend; another value displays it.
+        dot_size: Size of individual observations.
+        cap_size: Width of bar error-bar caps.
+        cap_width: Line width of bar error bars.
 
     Returns:
-        _type_: a figure (plot)
+        tuple: The Matplotlib figure and axes.
     """
     if ax is None:
         fig, ax = plt.subplots()
@@ -102,12 +109,12 @@ def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None,
     return fig, ax
 
 def anova_tukeyshsd(df, value_col, grouping_col):
-    """run a one-way anova with Tukey's HSD test afterward. Print out results 
+    """Print one-way ANOVA and Tukey HSD results for the selected columns.
 
     Args:
-        df (_type_): _description_
-        value_col (_type_): _description_
-        grouping_col (_type_): _description_
+        df: Dataframe containing observations and grouping labels.
+        value_col: Column containing the numeric response.
+        grouping_col: Column defining the groups to compare.
     """
     groups = [group[value_col].values for name, group in df.groupby(grouping_col)]
     # Run one-way ANOVA
@@ -124,14 +131,14 @@ def anova_tukeyshsd(df, value_col, grouping_col):
     print(tukey)
 
 def set_custom_mutant_palette(xaxis_order, t1_order=['whole', 'insoluble', 'soluble']):
-    """sets palette according to the PROTEIN column, to be passed to barplot function when the hue variable is being used. sets a different colour for each x axis value, one colour from a different palette each.
+    """Build a protein/fraction palette for the grouped bar plot.
 
     Args:
-        xaxis_order (_type_): _description_
-        t1_order (list, optional): _description_. Defaults to ['whole', 'insoluble', 'soluble'].
+        xaxis_order: Protein labels in plotting order.
+        t1_order: Fraction labels used to select shades from each palette.
 
     Returns:
-        _type_: _description_
+        dict: Palette keyed by ``(protein, fraction)`` pairs.
     """
     palette_dict = { 'WT' : 'Purples', 'A382P':'Greens', 'G335D': 'Reds', 'W385G':'Blues', 'x': 'Oranges'
     }
@@ -159,26 +166,26 @@ if __name__ == '__main__':
         os.makedirs(output_folder)
 
     set_params_for_plotting(fontsize=10)
-    #read in data
+    # Read the prepared whole, soluble, and insoluble fraction summaries.
     collated_solinsol_seeding = pd.read_csv(f'{input_folder}Fig3H_variant_sol_insol_seeded.csv')
-    #drop unnecessary columns
+    # Remove any CSV index column from the input table.
     collated_solinsol_seeding.drop([col for col in collated_solinsol_seeding.columns.tolist() if 'Unnamed:' in col], axis=1, inplace=True)
 
-    #set new purple / blue palette
+    # Define a purple palette for the plotted conditions.
     hex_colors = ["#4a006f","#460677","#45147e","#421e86","#3f288d","#3d3195","#3a3b9c","#3745a4","#354fab","#3259b3"]
     custom_palette = sns.color_palette(hex_colors)
     sns.palplot(custom_palette)
-    #set order of plotting (x ax)
+    # Set the variant display order.
     xaxis_order = ['WT', 'G335D', 'A382P', 'W385G']
 
-    #plot seeding of variants when particle numbers have been normalised to the wild-type
+    # Plot seeding values normalized to the wild-type particle number.
     fig, ax = bardotplot(collated_solinsol_seeding, 'protein', 'mean', xaxis_order, palette=custom_palette,  hue=
     'plot_treat', hue_order=['whole', 'insoluble', 'soluble'], xlabel='', scat_hue='plot_treat', scat_hue_order=['whole', 'insoluble', 'soluble'],ylabel='Seeding (%) relative to whole fraction', pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='', dot_size=5, cap_size=0.15, cap_width=2)
-    #set palette according to paper standard
+    # Build the manuscript palette for variant and fraction combinations.
     combined_palette = set_custom_mutant_palette(xaxis_order,t1_order=['whole', 'insoluble', 'soluble'])
     bar_colors = [combined_palette[(protein, 'insoluble')] for protein in xaxis_order]
     newcol_dict = dict(zip(xaxis_order, bar_colors))
-    #set bar faces: patterns according to fraction being represented, colour according to palette.
+    # Encode fraction type with fill patterns and variant with color.
     for stype, patch in zip([('whole', mut) for mut in xaxis_order]+ [('insoluble', mut) for mut in xaxis_order]+[('soluble', mut) for mut in xaxis_order], ax.patches):
         if stype[0] =='insoluble':
             patch.set_facecolor(newcol_dict[stype[1]])
@@ -214,4 +221,3 @@ if __name__ == '__main__':
                                         
 
                                         
-

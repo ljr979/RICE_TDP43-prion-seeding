@@ -1,9 +1,13 @@
-import os, re
+"""Plot colocalization measurements for Figure 4B.
+
+Reads the collated microscopy summary, formats bars by sample type and protein,
+and exports the final figure panel.
+"""
+
+import os
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from loguru import logger
 from statannotations.Annotator import Annotator
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 from scipy import stats 
@@ -12,6 +16,7 @@ from src.paperfig_utils import make_palette
 from src.paperfig_utils import save_figure_svg_png, set_params_for_plotting
 
 def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None, scat_hue_order=None, palette=False, xlabel='', ylabel=False, pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='', dot_size=5, cap_size=0.2, cap_width=2):
+    """Draw bars and individual observations with optional grouping labels."""
     if ax is None:
         fig, ax = plt.subplots()
     sns.barplot(
@@ -75,6 +80,7 @@ def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None,
     return fig, ax
 
 def anova_tukeyshsd(df, value_col, grouping_col):
+    """Print one-way ANOVA and Tukey HSD results for the selected columns."""
     groups = [group[value_col].values for name, group in df.groupby(grouping_col)]
     # Run one-way ANOVA
     f_stat, p_value = stats.f_oneway(*groups)
@@ -96,7 +102,6 @@ def anova_tukeyshsd(df, value_col, grouping_col):
     combined_palette = {}
     # For each protein, assign a base palette
     for protein in xaxis_order:
-        protein
         print(palette_dict[protein])
         base_colors = sns.color_palette(palette_dict[protein], n_colors=len(t1_order))
         for i, treatment in enumerate(t1_order):
@@ -114,10 +119,10 @@ if __name__ == '__main__':
         os.makedirs(output_folder)
 
     set_params_for_plotting(fontsize=10)
-    #read in collated data from all replicates (colocalisation in each channel. see data analysis and cellprofiler pipelines for all image processing and data wrangling)
+    # Read the collated microscopy measurements from all replicates.
     collated_coloc = pd.read_csv(f'{input_folder}Fig4B_collated_coloc_fibs.csv')
 
-    #plotting order
+    # Set the protein display order.
     xaxis_order = ['Atto647 alone', 'WT', 'G335D', 'A382P', 'W385G']
 
     fig, ax = bardotplot(collated_coloc, 'protein', 'value', xaxis_order, palette='viridis',  hue='plot_sample', hue_order=['pre-formed fibril(LCD-Atto647)', 'dNLS-mGFP inclusions'], xlabel='', scat_hue='plot_sample',scat_hue_order=['pre-formed fibril(LCD-Atto647)', 'dNLS-mGFP inclusions'], ylabel='Colocalisation of aggregates with each other(%)', pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend=True, dot_size=5, cap_size=0.15, cap_width=2)
@@ -126,7 +131,7 @@ if __name__ == '__main__':
     ax.set_ylim(0,100)
 
     palette = make_palette()
-    #add lines to bar faces and make colour correct from paper palette
+    # Apply the manuscript palette and hatching to distinguish sample types.
     for stype, patch in zip([('pre-formed fibril(LCD-Atto647)', mut) for mut in xaxis_order]+ [('dNLS-mGFP inclusions', mut) for mut in xaxis_order], ax.patches):
 
         print(stype[1])
@@ -142,7 +147,7 @@ if __name__ == '__main__':
             patch.set_linewidth(1)
 
 
-    #Make legend match plotting
+    # Replace the automatic legend with sample-type labels.
     mon_patch = mpatches.Patch(facecolor='dimgray', label='dNLS-mGFP inclusions', edgecolor='#fff', linewidth=1)
     seed_patch = mpatches.Patch(facecolor='dimgray', label='pre-formed fibril(LCD-Atto647)', edgecolor='#fff', linewidth=0, hatch='///')
     handles, labels = ax.get_legend_handles_labels()

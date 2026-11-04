@@ -1,13 +1,16 @@
-#This script reads in pre-processed data for, and generates panel B for figure , as well as panel B in Supplementary figure 1.
+"""Plot ThT fluorescence time courses for Figure 1B and Supplementary Figure 1.
 
-import os, re
+Reads a processed time-course table, summarizes signal by treatment and time,
+and exports separate plots for each variant and for monomer/control samples.
+"""
+
+import os
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from loguru import logger
 
 def save_figure_svg_png(fig, filename, width=3.5, height=None, dpi=300, tight=True):
+    """Save a Matplotlib figure as SVG and PNG at the requested size."""
     """
     Save a matplotlib figure as both SVG and PNG with standardized formatting.
     
@@ -49,6 +52,7 @@ def save_figure_svg_png(fig, filename, width=3.5, height=None, dpi=300, tight=Tr
     print(f"Saved PNG to: {png_path}")
 
 def set_params_for_plotting(fontsize=10):
+    """Set the plotting style used by the Figure 1 fluorescence panels."""
     new_rc_params = {'text.usetex': False,
     'font.family': 'Arial',
     'font.size': fontsize,            # Base font size
@@ -74,19 +78,19 @@ if __name__ == '__main__':
     set_params_for_plotting(fontsize=10)
 
     
-    #read in the file
+    # Read the processed fluorescence measurements and treatment metadata.
     data = pd.read_csv(f'{input_folder}1_change_in_intensity_plus_info.csv')
-    #drop unnecessary columns
+    # Drop the CSV index column if it was included during export.
     data.drop([col for col in data.columns.tolist() if 'Unnamed: 0' in col], axis=1, inplace=True)
-    #now only look at change in intensity not the normalised change
+    # Restrict the plots to absolute change in intensity.
     data = data[data['type'] == 'change_in_intensity']
-    #number of minutes between measurements
+    # Set the acquisition interval used to convert measurement indices to hours.
     interval_mins = 6
-    #melt dataframe for plotting
+    # Reshape timepoint columns into one row per sample and measurement.
     test_Df = pd.melt(data, id_vars= ['ID','treat2', 'treat1','t1', 't2', 't3','type','replicate'], var_name='timepoint', value_name='intensity' )
-    #convert time to hours
+    # Convert the measurement index to elapsed hours.
     test_Df['time (h)'] = (test_Df['timepoint'].astype(int)*interval_mins)/60
-    #define colour scheme for each protein
+    # Define a sequential color palette for each variant.
     palette_dict = {
         'WT' : 'Purples',
         'A382P':'Greens', 
@@ -95,7 +99,7 @@ if __name__ == '__main__':
         'Oranges'
 
     }
-    #define marker style for each TYPE of fibrillation or control
+    # Define marker shapes for treatment classes.
     marker_dict = {
         'blank' : 'X', 
         'monomer':'o', 
@@ -104,7 +108,7 @@ if __name__ == '__main__':
         'xseeding': 'X'
                    }
     
-    # Step 1: Aggregate mean and SEM
+    # Calculate mean signal and standard error for each condition and time.
     summary_df = (
         test_Df
         .groupby(['time (h)', 't1', 't2'])
@@ -113,7 +117,7 @@ if __name__ == '__main__':
         .reset_index()
     )
 
-    # Step 2: Filter every 3rd point for scatter (for cleaner plotting of data points)
+    # Retain regularly spaced points for a less crowded plot.
     scatter_df = (
         summary_df
         .groupby(['t1', 't2'])
@@ -122,7 +126,7 @@ if __name__ == '__main__':
     )
 
 
-    #plotting SUPP FIGURE 1.
+    # Generate the per-variant Supplementary Figure 1 plots.
     for mut, df in test_Df.groupby('t2'):
         print(mut)
 
@@ -172,8 +176,7 @@ if __name__ == '__main__':
         ax.spines['right'].set_visible(False)
         save_figure_svg_png(Fig, f'{output_folder}SuppFig1_change-in-intensity_{mut}', height=1.9, width=2.1)
 
-        #MAIN FIGURE 1B: here I'm going to plot the monomers ONLY on the same graph.
-        #then, I will plot as before (above) but instead of colour coding depending on mutant, colour code based on type of aggregation.
+        # Prepare a second plot containing only blank and monomer controls.
         monomer_only = test_Df[test_Df['t1'].isin(['blank', 'monomer'])].copy()
         mon_only_palette_dict = {}
         for mut, df in monomer_only.groupby('t2'):

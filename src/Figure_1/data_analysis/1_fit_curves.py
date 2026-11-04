@@ -127,7 +127,7 @@ def fit_curve(x_vals, y_vals, model_func, p0, bounds, inform, fit_type, extra_pa
         ``None``.
     """
     try:
-        popt, pcov = curve_fit(
+        popt, _ = curve_fit(
             model_func,
             x_vals,
             y_vals,
@@ -164,8 +164,6 @@ def is_valid_initial_guess(p0, bounds):
 
 
 if __name__ == '__main__':
-
-    filter_cols = []
 
     input_path = 'input_data/Figure_1/data_analysis/1_fit_curves/1_change_in_intensity_plus_info.csv'
     output_folder = 'output/Figure_1/data_analysis/1_fit_curves/'
@@ -213,7 +211,6 @@ if __name__ == '__main__':
 
     for (sample, t2, t3), df in clean_data.groupby(['t1', 't2', 't3']):
         for replicate, df1 in df.groupby('replicate'):
-            df1
             inform = f'{sample}-{t2}-{t3}-{replicate}'
 
             x_vals = df1['timepoint'].values
@@ -335,8 +332,6 @@ sns.barplot(melted_params, x="fit_type", y="value")
 
 
 for fit_type, df in melted_params.groupby('fit_type'):
-    df
-    fit_type
     amazing = df[df['value']>0.995]
     not_amazing = df[df['value']<0.995]
 
@@ -348,8 +343,6 @@ for fit_type, df in melted_params.groupby('fit_type'):
 # observed R-squared value.
 good_fits = []
 for sample, df in melted_params.groupby('inform'):
-    sample
-    df
     maximum = max(df['value'])
     best_fit = df[df['value']==maximum]
     if len(best_fit) > 1:
@@ -371,5 +364,3 @@ best_filtered.drop([col for col in best_filtered.columns.tolist() if 'variable' 
 
 best_filtered.to_csv(f'{output_folder}fit_parameters.csv')
 not_so_good_fits.to_csv(f'{output_folder}no_fit.csv')
-
-

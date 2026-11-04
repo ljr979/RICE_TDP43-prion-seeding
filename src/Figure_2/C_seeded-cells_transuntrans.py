@@ -1,14 +1,20 @@
-import os, re
+"""Plot aggregate-positive cell measurements for Figure 2B.
+
+Reads the prepared replicate-level table, calculates within-experiment ratios
+to the monomer control, and exports the treatment comparison and statistical
+summary.
+"""
+
+import os
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from loguru import logger
 from src.paperfig_utils import save_figure_svg_png, set_params_for_plotting
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 from scipy import stats
     
 def bardotplot(fold_increase_df, custom_palette, orders, ax):
+    """Draw treatment-level bars and replicate points on the supplied axes."""
     sns.barplot(data=fold_increase_df,
         x='plot_label', y='value',
         palette=custom_palette,
@@ -24,6 +30,7 @@ def bardotplot(fold_increase_df, custom_palette, orders, ax):
 
 
 def execute_anova_with_tukey(fold_increase_df):
+    """Run one-way ANOVA and Tukey HSD on the plotted treatment groups."""
     stats_df = fold_increase_df[['plot_label', 'value']].dropna()
     group_values = [g['value'].to_numpy()for _, g in stats_df.groupby('plot_label')]
     # Run one-way ANOVA
@@ -40,10 +47,9 @@ def execute_anova_with_tukey(fold_increase_df):
     return tukey
 
 def calculate_foldchange_seeding(input_data):
+    """Calculate each experiment's response relative to its monomer control."""
     fold_increase_df = []
     for replicate, df in input_data.groupby('Experiment'):
-        replicate
-        df
         df['fold_increase'] = df['value']/df['value'][df['treat']=='cont_monomer_trans'].values[0]
         fold_increase_df.append(df)
     fold_increase_df = pd.concat(fold_increase_df)
@@ -59,7 +65,7 @@ if __name__ == '__main__':
 
     set_params_for_plotting(fontsize=10)
 
-    #read in cleaned data from all replicates of this experiment (processed by cellprofiler first, and 'data analysis' scripts for each replicate)
+    # Read cleaned measurements collated across experimental replicates.
     input_data = pd.read_csv(f'{input_folder}Fig2B_seeding_transfection.csv')
 
     #normalise to the monomer control within each replicate to account for variability between days - option to plot but final plot currently plots % positive, not normalised.
@@ -72,14 +78,14 @@ if __name__ == '__main__':
     }
     fold_increase_df['plot_label'] = fold_increase_df['treat'].map(plot_dict)
 
-    #set new purple / blue palette
+    # Define the palette used for treatment categories.
     hex_colors = ["#4a006f","#470a77","#45147e","#421e86","#3f288d","#3d3195","#3a3b9c","#3745a4","#354fab","#3259b3"]
     custom_palette = sns.color_palette(hex_colors)
     sns.palplot(custom_palette)
 
 
     orders = ['Vehicle', 'BSA', 'Monomer', 'T', 'UT']
-    #plot and save data and figure. 
+    # Plot the measurements and save the figure.
     Fig, ax = plt.subplots()
     bardotplot(fold_increase_df, custom_palette, orders, ax)
     save_figure_svg_png(Fig, f'{output_folder}2B_seeded-cells_transfection', width=3.5)

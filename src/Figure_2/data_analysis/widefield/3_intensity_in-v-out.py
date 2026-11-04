@@ -62,7 +62,7 @@ agg_neg = agg_neg[cell_subset]
 alls.to_csv(f'{output_folder}cellprofiler_output_cols_subset.csv')
 
 
-#now want to find PER matched cell, the ratio of total cell intensity to intensity in small aggregates, big aggregates and combined
+# Calculate the aggregate-to-cell intensity ratio for each matched parent cell.
 melted = pd.melt(alls, id_vars=['Unique_parent', 'ImageNumber', 'ObjectNumber',  'types', 'treat','fold1_fold2'], value_vars=[ 'Intensity_IntegratedIntensity_GaussCorr_','Intensity_MeanIntensity_GaussCorr_', 'Children_Aggs_Count'])
 neg_melt = pd.melt(agg_neg, id_vars=['Unique_parent', 'ImageNumber', 'ObjectNumber',  'types', 'treat','fold1_fold2'], value_vars=[ 'Intensity_IntegratedIntensity_GaussCorr_','Intensity_MeanIntensity_GaussCorr_', 'Children_Aggs_Count'])
 melted.to_csv(f'{output_folder}melted_aggs_cells.csv')
@@ -88,7 +88,7 @@ ratios['ratio_agg_total'] = ratios['agg_intensity']/ratios['total_intensity']
 
 ratios[['Experiment', 'Treat', 'folder1','folder2', 'image', 'parent']] = ratios['Unique_parent'].str.split('_', expand=True)
 
-#need to match the aggregate negative data back on
+# Add zero-aggregate cells to the output table.
 neg_melt[['Experiment', 'Treat', 'folder1', 'folder2', 'image', 'parent']] = neg_melt['Unique_parent'].str.split('_', expand=True)
 
 neg_melt_intensity = neg_melt[neg_melt['variable']=='Intensity_MeanIntensity_GaussCorr_']
@@ -116,11 +116,11 @@ neg_melt_intensity = neg_melt_intensity[['Unique_parent',
 
 ratios_all = pd.concat([ratios, neg_melt_intensity])
 
-#make a new df to look at the ones that have an impossible ratio (i.e. higher than the total cell intensity)
+# Identify ratios above one for quality-control review.
 ratios_whack = ratios[ratios['ratio_agg_total']>1]
 
-#select for only those that HAVE aggregates, and that the aggregate intensity is not higher than the CELL intensity (SHOULDN'T BE POSSIBLE?)
-#not possible with MEAN intensity as the mean intensity of an agg is way brighter than the whole cell :) 
+# Retain aggregate-positive cells for the primary ratio plot.
+# Mean aggregate intensity can exceed mean whole-cell intensity.
 #ratios_aggs = ratios[ratios['ratio_agg_total']<=1]
 ratios_aggs = ratios[ratios['ratio_agg_total']>0]
 ratios_aggs['log_ratio_agg_total'] = np.log10(ratios_aggs['ratio_agg_total'])

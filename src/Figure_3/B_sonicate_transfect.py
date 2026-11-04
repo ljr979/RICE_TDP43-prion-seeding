@@ -1,15 +1,20 @@
-import os, re
+"""Plot the effect of sonication on seeded-cell aggregation for Figure 3B.
+
+Reads the prepared aggregate-count table, calculates within-experiment ratios
+to unsonicated samples, exports the plot, and prints statistical summaries.
+"""
+
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from loguru import logger
 from src.paperfig_utils import save_figure_svg_png, set_params_for_plotting
-import matplotlib.pyplot as plt
 from statannotations.Annotator import Annotator
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 from scipy import stats
     
 def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None, scat_hue_order=None, palette=False, xlabel='', ylabel=False, pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='', dot_size=5, cap_size=0.2, cap_width=2):
+    """Draw a bar plot with individual observations and optional annotations."""
     if ax is None:
         fig, ax = plt.subplots()
     sns.barplot(
@@ -73,6 +78,7 @@ def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None,
     return fig, ax
 
 def anova_tukeyshsd(df, value_col, grouping_col):
+    """Print one-way ANOVA and Tukey HSD results for the selected columns."""
     groups = [group[value_col].values for name, group in df.groupby(grouping_col)]
     # Run one-way ANOVA
     f_stat, p_value = stats.f_oneway(*groups)
@@ -100,16 +106,16 @@ if __name__ == '__main__':
 
     set_params_for_plotting(fontsize=10)
 
-    #read in the data collated from three replicates seeding variants. These have been pre-processed (cellprofiler + data analysis scripts) and cleaned before collating into one dataframe for plotting 
+    # Read the prepared aggregate-count data across replicates.
     collated_sonication_data = pd.read_csv(f'{input_folder}Fig3B_sonicated_aggcount.csv')
 
     xaxis_order = ['vehicle', 'unsonicated', '10s', '2min']
 
-    #plot the raw counts  (rather than normalised to unsonicated)
+    # Plot the unnormalized aggregate-positive percentages.
     fig, ax = bardotplot(collated_sonication_data, 'treatment1', 'value', xaxis_order, palette='Purples',  scat_hue='Experiment', xlabel='', ylabel='Cells with aggregates (%)', pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='', dot_size=5, cap_size=0.15, cap_width=2)
 
 
-    #now calculate for each biological replicate, the ratio between unsonicated and sonicated (i.e. the fold change in aggregation as a result of the sonication)
+    # Normalize each experiment to its unsonicated measurement.
     normalised_to_unson = []
     for replicate, df in collated_sonication_data.groupby('Experiment'):
         unson_value = df[df['treatment1'] == 'unsonicated']['value'].values[0]
@@ -117,7 +123,7 @@ if __name__ == '__main__':
         normalised_to_unson.append(df)
     normalised_to_unson = pd.concat(normalised_to_unson)
 
-    #set new purple / blue palette
+    # Define the manuscript palette for the normalized plot.
     hex_colors = ["#4a006f","#470a77","#45147e","#421e86","#3f288d","#3d3195","#3a3b9c","#3745a4","#354fab","#3259b3"]
     custom_palette = sns.color_palette(hex_colors)
     sns.palplot(custom_palette)

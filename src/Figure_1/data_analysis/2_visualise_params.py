@@ -7,12 +7,10 @@ cross-seeding conditions. The resulting figures are intended for exploratory
 comparison of kinetic trends across TDP-43 variants and treatment groups.
 """
 
-import os, re
+import os
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from loguru import logger
 
 
 def bar(fit_params, output_folder, monomer_only, group='t1', hue_order= None, order=None,hue_var='t2', pal='BuGn', x_var='t3', y_var='tlag', savefig=False, ylabel='Lag Phase (h)', xlabel='Seed added (%)', ylim=None):
@@ -38,8 +36,6 @@ def bar(fit_params, output_folder, monomer_only, group='t1', hue_order= None, or
     """
     fig, axes = plt.subplots(len(fit_params[group].unique()), 1, sharex=False, sharey=True, figsize=(5,15))
     for i, (t1, df) in enumerate(fit_params.groupby(group)):
-        t1
-        df
         if i>1:
             i = i-1
         if i==1:
@@ -85,8 +81,6 @@ def simple_bar(fit_params, output_folder, monomer_only, group='t1', hue_order= N
     """
     fig, ax = plt.subplots(1, 1, sharex=False, sharey=True, figsize=(5,5))
     for i, (t1, df) in enumerate(fit_params.groupby(group)):
-        t1
-        df
         i = i-1
         df = df[df['t3']!='seeds']
 
@@ -131,11 +125,8 @@ if __name__ == "__main__":
 
     # Plot each kinetic parameter using a shared monomer reference condition.
     for param in params_to_plot:
-        param
         monomer_only = fit_params[fit_params['inform']=='monomer-WT-0-1.0']
         monomer_only['t2'] = 'LCD_monomer'
         simple_bar(fit_params, output_folder, monomer_only, group='t3', hue_var='t1', x_var='t2', order=['WT', 'A382P', 'G335D', 'W385G'] , hue_order=['monomer', 'seeding', 'xseeding'],y_var=param, savefig=False, ylabel=param, xlabel='TDP MUTANT')
-
-
 
 

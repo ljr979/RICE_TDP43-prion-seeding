@@ -1,16 +1,20 @@
-import os, re
+"""Plot aggregate-to-cell intensity ratios by batch and concentration.
+
+Reads the processed inclusion-intensity table and exports the Figure 3E
+violin-and-point plot.
+"""
+
+import os
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from loguru import logger
 from statannotations.Annotator import Annotator
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 from scipy import stats 
-import matplotlib.patches as mpatches
 from src.paperfig_utils import save_figure_svg_png, set_params_for_plotting
 
 def violindotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None, scat_hue_order=None, palette=False, xlabel='', ylabel=False, pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='', dot_size=5):
+    """Draw a violin plot with individual observations and optional labels."""
     if ax is None:
         fig, ax = plt.subplots()
         sns.violinplot(
@@ -92,7 +96,7 @@ if __name__ == '__main__':
 
     set_params_for_plotting(fontsize=10)
 
-    #read in intensity data
+    # Read the prepared inclusion-intensity measurements.
     collated_intensity = pd.read_csv(f'{input_folder}Fig3E_inclusion_intensity.csv')
 
     titrations = collated_intensity[collated_intensity['type'].isin(['base', 'test'])]

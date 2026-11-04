@@ -1,14 +1,19 @@
-import os, re
+"""Compare original and particle-normalized seeding responses for Figure 3F.
+
+Reads the prepared paired-response table and exports a patterned
+bar-and-point comparison across batches.
+"""
+
+import os
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from loguru import logger
 import matplotlib.patches as mpatches
 from statannotations.Annotator import Annotator
 from src.paperfig_utils import save_figure_svg_png, set_params_for_plotting
 
 def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None, scat_hue_order=None, palette=False, xlabel='', ylabel=False, pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='', dot_size=5, cap_size=0.2, cap_width=2):
+    """Draw a bar plot with individual observations and optional annotations."""
     if ax is None:
         fig, ax = plt.subplots()
     sns.barplot(
@@ -72,6 +77,7 @@ def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None,
     return fig, ax
 
 def set_purple_palette():
+    """Display the purple palette used for the normalized-particle comparison."""
     hex_colors = ["#4a006f","#470a77","#45147e","#421e86","#3f288d","#3d3195","#3a3b9c","#3745a4","#354fab","#3259b3"]
     custom_palette = sns.color_palette(hex_colors)
     sns.palplot(custom_palette)
@@ -87,11 +93,9 @@ if __name__ == '__main__':
     set_params_for_plotting(fontsize=10)
 
 
-    #first lets plot the normalised particles dat. so need to read it in, and then plot it.
+    # Read the prepared original and particle-normalized response values.
     norm_correction = pd.read_csv(f'{input_folder}Fig3F_particle_num_seeding.csv')
 
-
-    plotting_df = norm_correction[norm_correction['type']!='base']
 
     # plot the original vs. normalised  differences
     #format being 'normed batch _ original batch' where original batch refers to the batch of fibrils which the normalised batch has had particle numbers equalised to
@@ -99,7 +103,7 @@ if __name__ == '__main__':
 
     fig, ax = bardotplot(norm_correction, 'plot_group', 'divided', xaxis_order, palette='viridis',  hue='type_difference', hue_order=['original_difference', 'normed_difference'], xlabel='',scat_hue='type_difference',scat_hue_order=['original_difference', 'normed_difference'], ylabel='Degree of change due to normalisation', pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend=True, dot_size=5, cap_size=0.15, cap_width=2)
     ax.tick_params(axis='x', rotation=90)
-    #set new purple / blue palette
+    # Display the palette used by the manuscript.
     set_purple_palette()
 
     for stype, patch in zip([('original_difference', mut) for mut in xaxis_order]+ [('normed_difference', mut) for mut in xaxis_order], ax.patches):
@@ -114,7 +118,7 @@ if __name__ == '__main__':
             patch.set_edgecolor('#fff')
             patch.set_linewidth(1)
         
-    #set faces of bars to have hatching to distinguish treatments
+    # Add a legend identifying the original and normalized conditions.
     mon_patch = mpatches.Patch(facecolor='dimgray', label='original_difference', edgecolor='#fff', linewidth=1)
     seed_patch = mpatches.Patch(facecolor='dimgray', label='normed_difference', edgecolor='#fff', linewidth=0, hatch='///')
 
@@ -123,5 +127,3 @@ if __name__ == '__main__':
     ax.legend([mon_patch, seed_patch], ['Original', 'Particle # equalised'], frameon=False, loc='upper left', handlelength=2., handletextpad=0.25, bbox_to_anchor=(-0.005, 1.15), ncols=3)
     plt.tight_layout()
     save_figure_svg_png(fig, f'{output_folder}3F_normed_particles', width=3.5)
-
-

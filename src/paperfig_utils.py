@@ -1,9 +1,7 @@
-import os, re
-import pandas as pd
-import numpy as np
+"""Shared plotting helpers used by the manuscript figure scripts."""
+
+import os
 import matplotlib.pyplot as plt
-import seaborn as sns
-from loguru import logger
 
 def save_figure_svg_png(fig, filename, width=3.5, height=None, dpi=300, tight=True):
     """
@@ -47,6 +45,7 @@ def save_figure_svg_png(fig, filename, width=3.5, height=None, dpi=300, tight=Tr
     print(f"Saved PNG to: {png_path}")
 
 def set_params_for_plotting(fontsize=10):
+    """Set the shared Matplotlib typography and SVG text settings."""
     new_rc_params = {'text.usetex': False,
     'font.family': 'Arial',
     'font.size': fontsize,            # Base font size
@@ -62,22 +61,10 @@ def set_params_for_plotting(fontsize=10):
     plt.rcParams.update(new_rc_params)
 
 def make_palette():
+    """Return the manuscript color mapping for the listed protein labels."""
     my_palette = {'Atto647 alone': (0.25, 0.25, 0.25),
     'WT': (0.617762399077278, 0.6021376393694733, 0.7834525182622069),
  'G335D': (0.9835755478662053, 0.4127950788158401, 0.28835063437139563),
  'A382P': (0.45176470588235296, 0.7670895809304115, 0.4612072279892349),
  'W385G': (0.41708573625528644, 0.6806305267204922, 0.8382314494425221)}
     return my_palette
-
-if __name__ == '__main__':
-
-    input_folder = ''
-    output_folder = ''
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-
-
-    new_rc_params = {'text.usetex': False,
-    'svg.fonttype': 'none'
-    }
-    plt.rcParams.update(new_rc_params)

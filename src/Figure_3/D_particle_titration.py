@@ -1,13 +1,19 @@
-import os, re
+"""Plot particle-dilution effects by seed batch for Figure 3D.
+
+Reads the prepared dilution-response table and exports a patterned
+bar-and-point summary across batches.
+"""
+
+import os
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from loguru import logger
 import matplotlib.patches as mpatches
+from statannotations.Annotator import Annotator
 from src.paperfig_utils import save_figure_svg_png, set_params_for_plotting
 
 def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None, scat_hue_order=None, palette=False, xlabel='', ylabel=False, pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='', dot_size=5, cap_size=0.2, cap_width=2):
+    """Draw a bar plot with individual observations and optional annotations."""
     if ax is None:
         fig, ax = plt.subplots()
     sns.barplot(
@@ -71,6 +77,7 @@ def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None,
     return fig, ax
 
 def set_purple_palette():
+    """Display the purple palette used for the dilution comparison."""
     hex_colors = ["#4a006f","#470a77","#45147e","#421e86","#3f288d","#3d3195","#3a3b9c","#3745a4","#354fab","#3259b3"]
     custom_palette = sns.color_palette(hex_colors)
     sns.palplot(custom_palette)
@@ -105,7 +112,7 @@ if __name__ == '__main__':
             patch.set_linewidth(1)
         
 
-    #need to add in STATISTICS and also LEGEND ENTRIES
+    # Create legend entries for the two dilution conditions.
     mon_patch = mpatches.Patch(facecolor='dimgray', label='1.0', edgecolor='#fff', linewidth=1)
     seed_patch = mpatches.Patch(facecolor='dimgray', label='0.5', edgecolor='#fff', linewidth=0, hatch='///')
 

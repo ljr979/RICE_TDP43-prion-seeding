@@ -1,23 +1,23 @@
-import os, re
+"""Compare aggregate-positive parental and dNLS cells for Figure 2F.
+
+Calculates per-replicate positive-cell percentages, plots the unnormalized
+values, then plots seeded values relative to the no-seed condition.
+"""
+
+import os
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from loguru import logger
 from src.paperfig_utils import save_figure_svg_png, set_params_for_plotting
 
 def calculate_cells_seeded(collated_data, agg_count):
-    """function to look into dataframes generated from cellprofiler, which have identified aggregates in confocal images of parental or dNLS cells, and calculate the percentage of cells with aggregates. 
+    """Append aggregate-positive cell percentages for each experimental group.
 
     Args:
-        collated_data (_type_): _description_
-        agg_count (_type_): _description_
+        collated_data: Collated CellProfiler cell data and treatment metadata.
+        agg_count: List that receives one summary row per group.
     """
     for (celltype, exp_type, replicate), df in collated_data.groupby(['celltype', 'seed_noseed', 'expnum-replicate']):
-        celltype
-        exp_type
-        replicate
-        df
         print(celltype, exp_type, replicate)
         #find the total number of cells for each replicate and cell type
         total_cells = len(df['ObjectNumber'].unique())
@@ -34,6 +34,7 @@ def calculate_cells_seeded(collated_data, agg_count):
         agg_count.append([celltype, exp_type, replicate, perc_pos])
 
 def nonnorm_barplot(agg_count, orders,  ax, yvar, pal, ylimit, ylabel, hue_var='seed_noseed'):
+    """Draw bars and replicate points for the supplied cell-level summary."""
     use_hue = hue_var is not None
 
     sns.barplot(data=agg_count,
@@ -72,36 +73,34 @@ if __name__ == '__main__':
 
     set_params_for_plotting(fontsize=10)
 
-    #read in data collated from all replicates, processed previously using data analysis scripts after cellprofiler pipelines.
+    # Read the collated CellProfiler measurements.
     collated_data = pd.read_csv(f'{input_folder}Fig2F_dNLSvsparental.csv')
     #find out the number of aggregates per experimental replicate, per treatment, per cell type.
     agg_count = []
     calculate_cells_seeded(collated_data, agg_count)
     agg_count = pd.DataFrame(agg_count, columns=['celltype', 'seed_noseed', 'expnum-replicate', 'percentage_positive_cells'])
 
-    #define plotting order
+    # Set the cell-type display order.
     orders = ['dNLS', 'parental']
 
-    #set new purple / blue palette
+    # Define the two-color palette used for the cell types.
     hex_colors = ["#4a006f","#3259b3"]
     custom_palette = sns.color_palette(hex_colors)
     sns.palplot(custom_palette)
 
-    #plot and save data and figure. 
-    #this plot is Supp Figure 2: aggregate counts per replicate with no normalisation
+    # Plot and save the unnormalized aggregate-positive percentages.
     Fig, ax = plt.subplots()
     nonnorm_barplot(agg_count, orders, ax, yvar='percentage_positive_cells', pal=custom_palette,ylimit=20, ylabel='Cells with aggregates (%)')
     save_figure_svg_png(Fig, f'{output_folder}SuppFig2_parental_vs_dNLS_non-normed', width=3.5, height=2.8)
 
 
-    #Now we will normalise the data for each cell type, to the 'no seed' treatment (i.e. how much does seeding INCREASE as a result of adding cells, for each cell line)
-    #filter out exp 27 because it doesn't have noseeds on that day
+    # Normalize seeded values to the no-seed condition within each replicate.
+    # Exclude the replicate that lacks a no-seed measurement.
     agg_count = agg_count[agg_count['expnum-replicate']!='27-2']
 
     ratios = []
     for celltype, df in agg_count.groupby('celltype'):
         for replicate, dfs in df.groupby('expnum-replicate'):
-            dfs
             #divide all treatments by the no seeds treatment 
             divide_by = dfs[dfs['seed_noseed']=='noseeds']['percentage_positive_cells'].values[0]
             dfs['ratio'] = dfs['percentage_positive_cells']/divide_by
@@ -114,8 +113,7 @@ if __name__ == '__main__':
 
     orders = ['dNLS', 'parental']
     ratios_seedonly = ratios[ratios['seed_noseed']=='seeds']
-    #plot and save data and figure. 
+    # Plot and save the seeded-to-no-seed ratios.
     Fig, ax = plt.subplots()
     nonnorm_barplot(ratios_seedonly, orders, ax, yvar='ratio', pal=custom_palette, ylimit=5, ylabel='Fold change in cells with aggregates', hue_var=None)
     save_figure_svg_png(Fig, f'{output_folder}2E_parental_vs_dNLS', width=3.5)
-

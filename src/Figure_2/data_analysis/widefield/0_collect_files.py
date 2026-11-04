@@ -5,6 +5,12 @@ attaches sample metadata from a plate map, and writes combined Cell and Aggs
 tables that can be used by downstream widefield analysis scripts.
 """
 
+"""Collate CellProfiler widefield exports and attach plate-map annotations.
+
+Reads per-image Cell and aggregate CSV exports from a replicate folder and
+writes combined tables for subsequent widefield analysis steps.
+"""
+
 import os
 import pandas as pd
 from src.paperfig_utils import create_sample_dictionary
@@ -60,5 +66,4 @@ for name in namelist:
 
     print(len(collated))
     collated.to_csv(f'{output_folder}{name}_collated.csv')
-
 

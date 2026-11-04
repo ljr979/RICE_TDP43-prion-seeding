@@ -5,6 +5,12 @@ treatment using a hard-coded layout map, calculates aggregate-positive cell
 fractions, and exports summary tables and plots for each time point.
 """
 
+"""Count aggregate-positive cells from a collated widefield cell table.
+
+Applies the treatment layout encoded below and writes treatment/timepoint
+summaries and plots.
+"""
+
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
