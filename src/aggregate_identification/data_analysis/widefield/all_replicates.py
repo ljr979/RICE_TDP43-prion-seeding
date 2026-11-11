@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
     aggs_cells = gather_replicates(input_folder, rep_type='2_intensity_in-v-out', file_I_want='cellprofiler_output_cols_subset.csv')
     
-    in_vs_out = gather_replicates(input_folder, rep_type='2_intensity_in-v-out', file_I_want='_Mean_in-v-out.csv')
+    in_vs_out = gather_replicates(input_folder, rep_type='2_intensity_in-v-out', file_I_want='_integrated_in-v-out.csv')
     #violins(output_folder, ratios, col_of_interest='count_ratio_small_big', pal='BuPu', ylabel='puncta count : aggregate count', save=False, saveas='ratio_count_puncta_aggregate.png', ylim=(-1,10), figtype='png')
 
 

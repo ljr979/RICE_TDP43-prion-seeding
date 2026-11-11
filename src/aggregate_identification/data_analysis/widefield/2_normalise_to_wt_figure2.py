@@ -70,11 +70,11 @@ def normalise_to_wt(df: pd.DataFrame, wt_label: str = 'UD-WT') -> pd.DataFrame:
 
 
 if __name__ == '__main__':
-    exp_num = 'Exp30-6'
+    exp_num = 'Expnum-replicate'
     wt_label = 'UD-WT'
 
-    input_folder = f'results/1_aggregate_count/{exp_num}/'
-    output_folder = f'results/1_aggregate_count/{exp_num}/'
+    input_folder = f'output/Figure_2/data_analysis/1_aggregate_count/{exp_num}/'
+    output_folder = f'output/Figure_2/data_analysis/1_aggregate_count/{exp_num}/'
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)

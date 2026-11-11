@@ -215,8 +215,7 @@ if __name__ == '__main__':
 
             x_vals = df1['timepoint'].values
             y_vals = df1['intensity'].values
-            # Clamp negative intensities to zero so constrained fits are not
-            # distorted by small background-subtraction artifacts.
+            # Clamp negative intensities to zero so constrained fits are not distorted by small background-subtraction artifacts.
             y_vals[y_vals < 0] = 0
             if len(y_vals) < 4 or np.std(y_vals) < 1e-3 or np.any(np.isnan(y_vals)):
                 no_fit.append((inform, 'skipped: too flat or invalid'))

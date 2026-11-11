@@ -12,10 +12,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-exp_num = 'Exp30-6'
+exp_num = 'Expnum-replicate'
 
-input_folder = 'results/0_collated_cellprofiler/'
-output_folder = f'results/2_intensity_in-v-out/{exp_num}/'
+input_folder = f'output/Figure_2/data_analysis/0_collect_files/'
+output_folder = f'output/Figure_2/data_analysis/2_intensity_in-v-out/{exp_num}/'
 
 if not os.path.exists(output_folder):
    os.makedirs(output_folder)
@@ -65,6 +65,7 @@ alls.to_csv(f'{output_folder}cellprofiler_output_cols_subset.csv')
 # Calculate the aggregate-to-cell intensity ratio for each matched parent cell.
 melted = pd.melt(alls, id_vars=['Unique_parent', 'ImageNumber', 'ObjectNumber',  'types', 'treat','fold1_fold2'], value_vars=[ 'Intensity_IntegratedIntensity_GaussCorr_','Intensity_MeanIntensity_GaussCorr_', 'Children_Aggs_Count'])
 neg_melt = pd.melt(agg_neg, id_vars=['Unique_parent', 'ImageNumber', 'ObjectNumber',  'types', 'treat','fold1_fold2'], value_vars=[ 'Intensity_IntegratedIntensity_GaussCorr_','Intensity_MeanIntensity_GaussCorr_', 'Children_Aggs_Count'])
+
 melted.to_csv(f'{output_folder}melted_aggs_cells.csv')
 neg_melt.to_csv(f'{output_folder}cells_no_aggs.csv')
 
@@ -73,7 +74,7 @@ ratio_info = []
 whats_up = []
 for parent, df in melted.groupby('Unique_parent'):
    treat = df['treat'].unique()[0]
-   intensity_df = df[df['variable']=='Intensity_MeanIntensity_GaussCorr_']
+   intensity_df = df[df['variable']=='Intensity_IntegratedIntensity_GaussCorr_']
    if len(intensity_df) > 2:
         total = intensity_df['value'][intensity_df['types'] == 'Cell_collated'].values[0]
         agg_intensity_all = intensity_df['value'][intensity_df['types'].isin(['Aggs_collated'])].values.sum()
@@ -91,7 +92,7 @@ ratios[['Experiment', 'Treat', 'folder1','folder2', 'image', 'parent']] = ratios
 # Add zero-aggregate cells to the output table.
 neg_melt[['Experiment', 'Treat', 'folder1', 'folder2', 'image', 'parent']] = neg_melt['Unique_parent'].str.split('_', expand=True)
 
-neg_melt_intensity = neg_melt[neg_melt['variable']=='Intensity_MeanIntensity_GaussCorr_']
+neg_melt_intensity = neg_melt[neg_melt['variable']=='Intensity_IntegratedIntensity_GaussCorr_']
 
 neg_melt_intensity.rename(columns={'value':'total_intensity'}, inplace=True)
 
@@ -128,32 +129,24 @@ ratios_aggs['log_ratio_agg_total'] = np.log10(ratios_aggs['ratio_agg_total'])
 # Also keep a combined table that includes zero-aggregate cells so readers can
 # inspect the full distribution if needed.
 ratios_all = ratios_all[ratios_all['ratio_agg_total']<=1]
-
-
-
-
-
-
-
+ratios_aggs.to_csv(f'{output_folder}_integrated_in-v-out.csv')
 
 
 # Plotting begins below.
 
 
-ratios_aggs.to_csv(f'{output_folder}_Mean_in-v-out.csv')
-
 # First plot only cells that contain aggregates, so the ratio reflects the
 # aggregate-localized signal within aggregate-positive cells.
 Fig, ax = plt.subplots()
 sns.boxplot(data=ratios_aggs, x='treat', y='ratio_agg_total', palette='YlOrRd', ax=ax)
-ax.set_ylim(0,50)
+ax.set_ylim(0,2)
 ax.set_ylabel('aggregate intensity : total cell intensity')
 handles, labels = ax.get_legend_handles_labels()
 ax.legend(handles=handles[0:], labels=labels[0:])
 ax.tick_params(axis='x', rotation=90)
 plt.tight_layout()
-plt.savefig(f'{output_folder}mean_ratio_in_agg_v_aggonly.png')
-plt.savefig(f'{output_folder}mean_ratio_in_agg_v_aggonly.svg')
+plt.savefig(f'{output_folder}integrated_ratio_in_agg_v_aggonly.png')
+plt.savefig(f'{output_folder}integrated_ratio_in_agg_v_aggonly.svg')
 
 
 
@@ -167,5 +160,5 @@ handles, labels = ax.get_legend_handles_labels()
 ax.legend(handles=handles[0:], labels=labels[0:])
 ax.tick_params(axis='x', rotation=90)
 plt.tight_layout()
-plt.savefig(f'{output_folder}mean_agg_intensity.png')
-plt.savefig(f'{output_folder}mean_agg_intensity.svg')
+plt.savefig(f'{output_folder}integrated_agg_intensity.png')
+plt.savefig(f'{output_folder}integrated_agg_intensity.svg')

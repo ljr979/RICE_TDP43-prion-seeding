@@ -10,10 +10,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-exp_num = 'Exp30-6'
+exp_num = 'Expnum-replicate'
 
-input_folder = f'results/0_collated_cellprofiler/{exp_num}'
-output_folder = f'results/1_aggregate_count/{exp_num}/'
+input_folder = f'output/0_collect_files/{exp_num}'
+output_folder = f'output/1_aggregate_count/{exp_num}/'
 cells = pd.read_csv(f'{input_folder}/Cell_collated.csv')
 
 if not os.path.exists(output_folder):

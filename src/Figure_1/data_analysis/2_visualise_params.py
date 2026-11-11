@@ -36,6 +36,8 @@ def bar(fit_params, output_folder, monomer_only, group='t1', hue_order= None, or
     """
     fig, axes = plt.subplots(len(fit_params[group].unique()), 1, sharex=False, sharey=True, figsize=(5,15))
     for i, (t1, df) in enumerate(fit_params.groupby(group)):
+        t1
+        df
         if i>1:
             i = i-1
         if i==1:
@@ -81,6 +83,8 @@ def simple_bar(fit_params, output_folder, monomer_only, group='t1', hue_order= N
     """
     fig, ax = plt.subplots(1, 1, sharex=False, sharey=True, figsize=(5,5))
     for i, (t1, df) in enumerate(fit_params.groupby(group)):
+        t1
+        df
         i = i-1
         df = df[df['t3']!='seeds']
 
@@ -104,8 +108,8 @@ def simple_bar(fit_params, output_folder, monomer_only, group='t1', hue_order= N
         plt.savefig(f'{output_folder}{y_var}_plot_all.png')
 
 if __name__ == "__main__":    
-    input_folder = 'input_data/Figure_1/data_analysis/3_visualise_params/'
-    output_folder = 'output/Figure_1/data_analysis/3_visualise_params/'
+    input_folder = 'input_data/Figure_1/data_analysis/2_visualise_params/'
+    output_folder = 'output/Figure_1/data_analysis/2_visualise_params/'
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -125,8 +129,11 @@ if __name__ == "__main__":
 
     # Plot each kinetic parameter using a shared monomer reference condition.
     for param in params_to_plot:
+        param
         monomer_only = fit_params[fit_params['inform']=='monomer-WT-0-1.0']
         monomer_only['t2'] = 'LCD_monomer'
         simple_bar(fit_params, output_folder, monomer_only, group='t3', hue_var='t1', x_var='t2', order=['WT', 'A382P', 'G335D', 'W385G'] , hue_order=['monomer', 'seeding', 'xseeding'],y_var=param, savefig=False, ylabel=param, xlabel='TDP MUTANT')
+
+
 
 
