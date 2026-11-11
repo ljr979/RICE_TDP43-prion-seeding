@@ -85,7 +85,7 @@ def set_purple_palette():
 if __name__ == '__main__':
 
     input_folder = 'input_data/Figure_3/'
-    output_folder = 'output/Figure_3/F_normed_particles/'
+    output_folder = 'output/Figure_3/D_E_F_particles_titration/'
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -126,4 +126,4 @@ if __name__ == '__main__':
     by_label = dict(zip(reversed(labels), reversed(handles)))
     ax.legend([mon_patch, seed_patch], ['Original', 'Particle # equalised'], frameon=False, loc='upper left', handlelength=2., handletextpad=0.25, bbox_to_anchor=(-0.005, 1.15), ncols=3)
     plt.tight_layout()
-    save_figure_svg_png(fig, f'{output_folder}3F_normed_particles', width=3.5)
+    save_figure_svg_png(fig, f'{output_folder}SuppFig7A_normed_particles', width=3.5)

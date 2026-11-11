@@ -58,12 +58,13 @@ def create_sample_dictionary(map_df):
     """
     sample_dict = {}
 
-    for _, row in map_df.iterrows():
+    for index, row in map_df.iterrows():
         row_label = row['row']
 
         for col in map_df.columns:
             if col == 'row':
                 continue
+            col
             if pd.notna(row[col]):
                 coordinate = f"{row_label}_{col}"
                 sample_dict[coordinate] = row[col]
@@ -98,7 +99,9 @@ def add_info (df):
         annotation columns.
     """
     new=[]
-    for ids, d in df.groupby('ID'):
+    for ids, d in df.groupby('ID'):    
+        ids
+        d
         if 'time(h)' not in ids:
             d['treat2'] = ids.split('_')[1]
             d['treat1'] = ids.split('_')[0]
@@ -121,6 +124,7 @@ def average_tech_replicates(new):
     """
     averages = []
     for treat, x in new.groupby('treat2'):
+        x
         to_av = [col for col in x if col not in ['ID', 'replicate', 'treat1', 'treat2']]
         numeric = x[[c for c in x.columns if c in to_av]].astype(int)
         average = pd.DataFrame(numeric.mean(axis=0)).T
@@ -199,6 +203,9 @@ def plot_fluo_over_time(d, interval_mins, output_folder, palette, Exp_num, lengt
         else:
             new_pal = palette
         for i, (t2, abc) in enumerate(xyz.groupby('t2')):
+            i
+            t2
+            abc
             sns.lineplot(data=abc, x='time (h)', y='intensity', palette=new_pal, hue='t3', ax=axes[i])
             axes[i].set_xlim(0,length_exp)
             axes[i].set_ylim(ylim)
@@ -257,8 +264,8 @@ def get_more_info(df, col_to_split, what_to_split):
 if __name__ == '__main__':
 
 
-    replicate = 'rep_3'
-    Exp_num = 'Exp31-3'
+    replicate = 'rep_1'
+    Exp_num = 'Exp31-1'
     input_folder = 'input_data/Figure_1/data_analysis/0_process_raw/'
     output_folder = 'output/Figure_1/data_analysis/0_process_raw/'
 
@@ -345,6 +352,7 @@ if __name__ == '__main__':
     # Generate per-mutation quality-control plots of normalized fluorescence
     # trajectories for visual inspection.
     for mut, df in test_Df.groupby('t2'):
+        df
         print(mut)
         
         new_pal = palette_dict[mut]

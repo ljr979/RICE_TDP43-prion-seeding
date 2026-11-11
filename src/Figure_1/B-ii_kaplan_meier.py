@@ -1,10 +1,4 @@
 
-"""Plot lag-time Kaplan-Meier curves and compare protein groups statistically.
-
-Reads the prepared lag-time/event table for Figure 1B-ii, exports the survival
-curves, and writes pairwise log-rank tests with Benjamini-Hochberg adjustment.
-"""
-
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -26,7 +20,7 @@ if __name__ == '__main__':
 
     set_params_for_plotting(fontsize=10)
 
-    # Read lag times and event indicators prepared by the curve-fitting workflow.
+    #read in lag phase data - this comes from fitting curves and extracting parameters. See 'data analysis' scripts for detail on how this was performed
     combined = pd.read_csv(f'{input_folder}B-ii_tlag_km.csv')
 
     #define palette for manuscript
@@ -49,9 +43,10 @@ if __name__ == '__main__':
     # Group by desired condition (protein + treatment, or just treatment)
     summary_rows = []
     for name, group in combined.groupby(['protein']):
-        # Use fitted lag time as the survival duration.
+        group
+        #define the time variable as the lag time from the fitted curves
         T = group['tlag']
-        # Use the supplied event indicator to distinguish observations from censoring.
+        #this helps with plotting but defines each time as an 'event' 
         E = group['event']
         label = f'{name[0]}'
         #fit the kaplan meier function to data
@@ -76,6 +71,7 @@ if __name__ == '__main__':
 
     summary_df = pd.DataFrame(summary_rows)
     #save
+    #summary_df.to_csv(f'{output_folder}Fig1B-ii_km_result-quartiles.csv')
 
     #plotting km curves all on same figure
     plt.xlabel("Time (h)")
@@ -86,7 +82,7 @@ if __name__ == '__main__':
     save_figure_svg_png(Fig, f'{output_folder}E_kaplan_meier_plot', width=3.5)
 
 
-    # Compare each pair of protein groups using the log-rank test.
+    #now  statistically test between groups (diff in lag time based on median survival from km )
     #Log-rank test → compares entire survival processes
     groups = combined['protein'].unique() #group by variant
     results = []
@@ -122,8 +118,10 @@ if __name__ == '__main__':
     pairwise_df = pd.DataFrame(results)
     print(pairwise_df)
 
-    # Adjust the pairwise p-values for multiple comparisons.
+    #now need to FDR correct for multiple comparisons
     pairwise_df["p_fdr"] = multipletests(pairwise_df["p"], method="fdr_bh")[1]
     #final 'is corrected p value < 0.01???) column
     pairwise_df['p_fdr_corrected_0_01'] = pairwise_df['p_fdr']<0.01
     pairwise_df.to_csv(f'{output_folder}Fig1B-ii_kaplan_stats.csv')
+
+

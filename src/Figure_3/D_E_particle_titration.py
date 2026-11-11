@@ -85,7 +85,7 @@ def set_purple_palette():
 if __name__ == '__main__':
 
     input_folder = 'input_data/Figure_3/'
-    output_folder = 'output/Figure_3/D_particles_titration/'
+    output_folder = 'output/Figure_3/D_E_particles_titration/'
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -96,6 +96,13 @@ if __name__ == '__main__':
     titrations['dilution_factor'] = titrations['dilution_factor'].astype(str)
     xaxis_order = ['batch1', 'batch2', 'batch3']
 
+    #plot as per panel D (dot plot for variability between batches (original, non-normalised for dilutions))
+    fig, ax = plt.subplots()
+    ax = sns.scatterplot(data=titrations[titrations['type']=='base'], x='Experiment', y='value', hue='original_batch', )
+    ax.set_ylim(0,8)
+    plt.savefig(f'{output_folder}3D_batch_variability.png')
+
+    #now plot as per panel E - effect of dilution 
     fig, ax = bardotplot(titrations, 'original_batch', 'effect_of_dilution', xaxis_order, palette='viridis',  hue='dilution_factor', hue_order=['1.0', '0.5'], xlabel='Seed Batch',scat_hue='dilution_factor',scat_hue_order=['1.0', '0.5'], ylabel='Effect of dilution on seeding', pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend=True, dot_size=5, cap_size=0.15, cap_width=2)
     ax.tick_params(axis='x', rotation=90)
 
@@ -123,4 +130,4 @@ if __name__ == '__main__':
     ax.legend([mon_patch, seed_patch], ['1.0x', '0.5x'], frameon=False, loc='upper left', handlelength=2., handletextpad=0.25, bbox_to_anchor=(-0.005, 1.15), ncols=3)
 
     plt.tight_layout()
-    save_figure_svg_png(fig, f'{output_folder}3B_dilution_seeding', width=3.5)
+    save_figure_svg_png(fig, f'{output_folder}3E_dilution_seeding', width=3.5)

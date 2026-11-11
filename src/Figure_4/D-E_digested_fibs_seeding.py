@@ -1,14 +1,7 @@
-"""Plot Figure 4E digestion comparisons and paired replicate measurements.
-
-Reads processed summary and paired data tables, exports unpaired and paired
-plots, and prints the configured statistical tests.
-"""
-
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from statannotations.Annotator import Annotator
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 from scipy import stats 
 import matplotlib.patches as mpatches
@@ -18,7 +11,6 @@ from src.paperfig_utils import save_figure_svg_png, set_params_for_plotting
 from scipy.stats import wilcoxon
 
 def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None, scat_hue_order=None, palette=False, xlabel='', ylabel=False, pairs=False, correction=None, xticks=None, groups=None, group_label_y=-0.18, group_line_y=-0.05, ax=None, legend='', dot_size=5, cap_size=0.2, cap_width=2):
-    """Draw bars and individual observations with optional grouping labels."""
     if ax is None:
         fig, ax = plt.subplots()
     else:
@@ -84,7 +76,6 @@ def bardotplot(data, xcol, ycol, order, hue=None, hue_order=None, scat_hue=None,
     return fig, ax
 
 def plot_paired_points_nolines(paired_wide, protein_order_present, protein_palette, ax=None, figsize=(10, 6)):
-    """Plot digestion states as paired categories without connecting lines."""
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
     else:
@@ -112,17 +103,17 @@ def plot_paired_points_nolines(paired_wide, protein_order_present, protein_palet
             zorder=3,
         )
 
-    # Label each observation with its experiment identifier.
+    # STEP 15: Optional text labels for replicate identity on each point.
     for _, row in paired_wide.iterrows():
         ax.text(row['x_undigested'] + 0.015, row['undigested'], row['Experiment'], fontsize=7, va='center')
         ax.text(row['x_PKdigested'] + 0.015, row['PKdigested'], row['Experiment'], fontsize=7, va='center')
 
-    # Set category tick labels.
+    # STEP 16: Set category tick labels.
     ax.set_xticks(range(len(protein_order_present)))
     ax.set_xticklabels(protein_order_present, rotation=45, ha='right')
     ax.set_ylabel('Mean % cells with aggregates')
     ax.set_xlabel('Protein')
-    ax.set_title('Paired observations without connecting lines')
+    ax.set_title('STEP 16: Points only (check dot placement before linking)')
     protein_handles = [
         mpatches.Patch(facecolor=protein_palette.get(p, 'gray'), edgecolor='black', label=p)
         for p in protein_order_present
@@ -139,14 +130,13 @@ def plot_paired_points_nolines(paired_wide, protein_order_present, protein_palet
     return fig, ax
 
 def plot_paired_points_lines(paired_wide, protein_order_present, protein_palette, ax=None, figsize=(10, 6)):
-    """Plot paired digestion-state observations connected within replicates."""
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
     else:
         fig = ax.figure
 
 
-    # Connect each experiment's undigested and digested observations.
+    # STEP 18: Draw one line per Experiment+protein pair from undigested to PKdigested.
     for _, row in paired_wide.iterrows():
         ax.plot(
             [row['x_undigested'], row['x_PKdigested']],
@@ -157,7 +147,8 @@ def plot_paired_points_lines(paired_wide, protein_order_present, protein_palette
             zorder=2,
         )
 
-    # Overlay the observations, using color for protein and shape for digestion.
+    # STEP 19: Draw the two treatment point sets over the lines.
+    # Color encodes protein; marker shape encodes digestion state.
     for protein, sub in paired_wide.groupby('protein'):
         color = protein_palette.get(protein, 'gray')
         ax.scatter(
@@ -179,12 +170,12 @@ def plot_paired_points_lines(paired_wide, protein_order_present, protein_palette
             zorder=3,
         )
 
-    # Replicate labels are omitted from this plot to reduce visual clutter.
+    # STEP 20: Add replicate labels so each dot identity is visible.
     # for _, row in paired_wide.iterrows():
     #     ax.text(row['x_undigested'] + 0.015, row['undigested'], row['Experiment'], fontsize=7, va='center')
     #     ax.text(row['x_PKdigested'] + 0.015, row['PKdigested'], row['Experiment'], fontsize=7, va='center')
 
-    # Format axes and legends for the paired comparison.
+    # STEP 21: Final axis formatting.
     ax.set_xticks(range(len(protein_order_present)))
     ax.set_xticklabels(protein_order_present, rotation=90)
     ax.set_ylabel('Cells with aggregates (%)')
@@ -207,7 +198,6 @@ def plot_paired_points_lines(paired_wide, protein_order_present, protein_palette
     return fig, ax
 
 def anova_tukeyshsd(df, value_col, grouping_col):
-    """Print one-way ANOVA and Tukey HSD results for the selected columns."""
     groups = [group[value_col].values for name, group in df.groupby(grouping_col)]
     # Run one-way ANOVA
     f_stat, p_value = stats.f_oneway(*groups)
@@ -226,14 +216,15 @@ if __name__ == '__main__':
 
     input_folder = 'input_data/Figure_4/'
 
-    output_folder = 'output/Figure_4/E_digested_fibs_seeding/'
+    output_folder = 'output/Figure_4/D-E_digested_fibs_seeding/'
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
     set_params_for_plotting(fontsize=10)
 
-    collated_coloc = pd.read_csv(f'{input_folder}Fig4E_digested_fibrils.csv')
+    #this file is the COLLATED REPLICATES of the output file generated from src\Figure_4\data_analysis\panel_D\1_fold-change_pkdigest.py (fold_change_aggcount.csv)
+    collated_coloc = pd.read_csv(f'{input_folder}Fig4D_digested_fibrils.csv')
     
     xaxis_order = ['WT', 'G335D', 'A382P', 'W385G']
 
@@ -251,8 +242,8 @@ if __name__ == '__main__':
 
 
 
-    # Prepare the paired replicate-level plot and tests.
-    paired_df = pd.read_csv(f'{input_folder}Fig4Ei_allreps_paired_dotplot_input.csv')
+    #------------------------------ now need making a paired dot plot, do stats on that
+    paired_df = pd.read_csv(f'{input_folder}Fig4Di_allreps_paired_dotplot_input.csv')
 
     #SANITY check just points alone no lines (plus annotation of experiment number)
     fig, ax = plot_paired_points_nolines(
@@ -262,12 +253,14 @@ if __name__ == '__main__':
     )
     save_figure_svg_png(fig, f'{output_folder}4Ei_digested_paired_nolines', width=3.5)
 
-    # Plot the paired observations with connecting lines.
+    #now plot with lines
     fig, ax = plot_paired_points_lines(paired_wide=paired_df, protein_order_present=['WT', 'G335D', 'A382P', 'W385G'], protein_palette=paper_palette)
     save_figure_svg_png(fig, f'{output_folder}4Ei_prot_K_paired_lines', width=3.5)
 
-    # Compare paired digestion states within each protein group.
+    #now need to do stats on this
+    #doing a REPEATED MEASURES (PAIRED) T-TEST between undigested and digested for each protein- this means that we are asking- 'did the undigested and digested groups have the same average % of cells with aggregates?'.
     for protein, df in paired_df.groupby('protein'):
+        df
         t_statistic, p_value = stats.ttest_rel(df['undigested'], df['PKdigested'], alternative='less')
         print(f'T-TEST: {protein} - tstat = {t_statistic}, p_val = {p_value}')
 

@@ -110,7 +110,6 @@ def anova_tukeyshsd(df, value_col, grouping_col):
 
 if __name__ == '__main__':
 
-
     input_folder = 'input_data/Figure_4/'
 
     output_folder = 'output/Figure_4/B_fibrils_dNLS_coloc/'

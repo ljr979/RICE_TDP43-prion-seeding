@@ -1,4 +1,4 @@
-"""Normalize aggregate-positive percentages to WT for Figure 2 widefield data.
+"""Normalize aggregate-positive percentages to WT for Figure 2 widefield data (panel H).
 
 This script is a Figure 2-specific follow-on step for
 `1_aggregate_count_plate-map.py`. It reads the exported `count_melt` table,
