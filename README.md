@@ -10,7 +10,7 @@ This repository contains the analysis code associated with the manuscript “ALS
 
 ## Data
 
-Download the `input_data/` directory from the associated Zenodo record and place it in the repository root before running the analysis scripts. Preserve the directory structure in the data archive so that the scripts can find their inputs. The data archive includes processed figure-input tables and examples for selected analysis steps; it does not include every original experimental measurement or microscopy image.
+Download the `input_data/` directory from the associated Zenodo record [`10.5281/zenodo.24271618`] and place it in the repository root before running the analysis scripts. Preserve the directory structure in the data archive so that the scripts can find their inputs. The data archive includes processed figure-input tables and examples for selected analysis steps; it does not include every original experimental measurement or microscopy image.
 
 ## Environment
 Included in the repository are 4 .yml environment files. 
