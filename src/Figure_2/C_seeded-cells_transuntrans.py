@@ -58,7 +58,7 @@ def calculate_foldchange_seeding(input_data):
 if __name__ == '__main__':
 
     input_folder = 'input_data/Figure_2/'
-    output_folder = 'output/Figure_2/B_transuntrans/'
+    output_folder = 'output/Figure_2/C_transuntrans/'
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     set_params_for_plotting(fontsize=10)
 
     # Read cleaned measurements collated across experimental replicates.
-    input_data = pd.read_csv(f'{input_folder}Fig2B_seeding_transfection.csv')
+    input_data = pd.read_csv(f'{input_folder}Fig2C_seeding_transfection.csv')
 
     #normalise to the monomer control within each replicate to account for variability between days - option to plot but final plot currently plots % positive, not normalised.
     fold_increase_df = calculate_foldchange_seeding(input_data)
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     # Plot the measurements and save the figure.
     Fig, ax = plt.subplots()
     bardotplot(fold_increase_df, custom_palette, orders, ax)
-    save_figure_svg_png(Fig, f'{output_folder}2B_seeded-cells_transfection', width=3.5)
+    save_figure_svg_png(Fig, f'{output_folder}2C_seeded-cells_transfection', width=3.5)
 
  
     #statistics 

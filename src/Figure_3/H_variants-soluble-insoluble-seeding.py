@@ -167,7 +167,7 @@ if __name__ == '__main__':
 
     set_params_for_plotting(fontsize=10)
     # Read the prepared whole, soluble, and insoluble fraction summaries.
-    collated_solinsol_seeding = pd.read_csv(f'{input_folder}Fig3H_variant_sol_insol_seeded.csv')
+    collated_solinsol_seeding = pd.read_csv(f'{input_folder}Fig3H_relative_to_whole.csv')
     # Remove any CSV index column from the input table.
     collated_solinsol_seeding.drop([col for col in collated_solinsol_seeding.columns.tolist() if 'Unnamed:' in col], axis=1, inplace=True)
 

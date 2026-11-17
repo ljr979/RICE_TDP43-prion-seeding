@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
 
     # Read the prepared original and particle-normalized response values.
-    norm_correction = pd.read_csv(f'{input_folder}Fig3F_particle_num_seeding.csv')
+    norm_correction = pd.read_csv(f'{input_folder}SuppFig7A_particle_num_seeding.csv')
 
 
     # plot the original vs. normalised  differences

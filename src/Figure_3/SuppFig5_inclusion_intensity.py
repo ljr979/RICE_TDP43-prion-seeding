@@ -89,7 +89,7 @@ if __name__ == '__main__':
     set_params_for_plotting(fontsize=10)
 
     #read in intensity data
-    collated_intensity = pd.read_csv(f'{input_folder}Fig3E_inclusion_intensity.csv')
+    collated_intensity = pd.read_csv(f'{input_folder}SuppFig5_inclusion_intensity.csv')
 
     titrations = collated_intensity[collated_intensity['type'].isin(['base', 'test'])]
 

@@ -116,4 +116,4 @@ if __name__ == '__main__':
     # Plot and save the seeded-to-no-seed ratios.
     Fig, ax = plt.subplots()
     nonnorm_barplot(ratios_seedonly, orders, ax, yvar='ratio', pal=custom_palette, ylimit=5, ylabel='Fold change in cells with aggregates', hue_var=None)
-    save_figure_svg_png(Fig, f'{output_folder}2E_parental_vs_dNLS', width=3.5)
+    save_figure_svg_png(Fig, f'{output_folder}2F_parental_vs_dNLS', width=3.5)

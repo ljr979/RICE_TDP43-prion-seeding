@@ -1,0 +1,12 @@
+name: std_scripts_enviro
+channels:
+  - defaults
+dependencies:
+  - python
+  - ipykernel
+  - pandas
+  - matplotlib
+  - seaborn
+  - loguru
+  - openpyxl
+prefix: 

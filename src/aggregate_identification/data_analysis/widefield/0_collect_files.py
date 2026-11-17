@@ -16,8 +16,8 @@ import pandas as pd
 from src.paperfig_utils import create_sample_dictionary
 
 Expnum = 'Expnum-replicate'
-input_folder = "input_data/Figure_2/data_analysis/0_collect_files/replicate_num/"
-output_folder = f'output/Figure_2/data_analysis/0_collect_files/{Expnum}/'
+input_folder = "input_data/aggregate_identification/data_analysis/widefield/0_collect_files/"
+output_folder = f'output/aggregate_identification/data_analysis/widefield/0_collect_files/{Expnum}/'
 
 if not os.path.exists(output_folder):
    os.makedirs(output_folder)

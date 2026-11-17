@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     # Recover treatment annotations from the composite sample identifier stored
     # in the fitting output.
-    fit_params[['t1', 't2', 't3', 'replicate']] = fit_params['inform'].str.split('-', expand=True)
+    fit_params[['t1', 't2', 't3', 'replicate']] = fit_params['sample'].str.split('-', expand=True)
 
     # Apply the empirical fit-quality threshold used for downstream comparison.
     fit_params = fit_params[fit_params['rquare']>0.99]
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     # Plot each kinetic parameter using a shared monomer reference condition.
     for param in params_to_plot:
         param
-        monomer_only = fit_params[fit_params['inform']=='monomer-WT-0-1.0']
+        monomer_only = fit_params[fit_params['sample']=='monomer-WT-0-1.0']
         monomer_only['t2'] = 'LCD_monomer'
         simple_bar(fit_params, output_folder, monomer_only, group='t3', hue_var='t1', x_var='t2', order=['WT', 'A382P', 'G335D', 'W385G'] , hue_order=['monomer', 'seeding', 'xseeding'],y_var=param, savefig=False, ylabel=param, xlabel='TDP MUTANT')
 
