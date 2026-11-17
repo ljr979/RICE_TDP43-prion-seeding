@@ -1,6 +1,6 @@
 # Analysis and figure scripts
 
-This guide summarizes the analysis scripts in `src/`, their roles, and the input data associated with each workflow. Paths are relative to the repository root. Download the separate Zenodo data archive and place its `input_data/` directory in the repository root before running scripts that use these files. Figure-generation scripts use prepared CSV tables; upstream analysis steps may require raw images, plate-reader exports, or other experiment-specific files.
+This guide summarizes the analysis scripts in `src/`, their roles, and the input data associated with each workflow. Paths are relative to the repository root. Download the separate Zenodo data archive (`10.5281/zenodo.24271618`) and place its `input_data/` directory in the repository root before running scripts that use these files. Figure-generation scripts use prepared CSV tables; upstream analysis steps may require raw images, plate-reader exports, or other experiment-specific files.
 
 ## Figure 1: plate-reader assays
 
